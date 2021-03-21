@@ -1,4 +1,6 @@
-# Godot Compiler
+# Godot Linux Editor Compiler
+
+This is a script to compile the up-to-date Linux version for Godot Editor with templates.
 
 ## Requirements
 
