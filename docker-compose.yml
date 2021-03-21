@@ -1,5 +1,18 @@
-godot-compiler:
-        build: .
-        volumes:
-                - ./code:/godot
-                - ./output:/output
+version: "3.9"
+services:
+  linux-master:
+    build: .
+    volumes:
+      - ./code/master:/godot:z
+      - ./output/master:/output:z
+    environment:
+      GODOT_BRANCH: master
+      PLATFORM: linuxbsd
+  linux-3.2:
+    build: .
+    volumes:
+      - ./code/3.2:/godot:z
+      - ./output/3.2:/output:z
+    environment:
+      GODOT_BRANCH: 3.2
+      PLATFORM: x11

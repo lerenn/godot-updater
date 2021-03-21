@@ -18,10 +18,8 @@ git pull
 
 # Export Docker-specific variables 
 export TEMPLATE_BASE_DIR=/output/templates
+export BINARY_BASE_DIR=/output
 source /usr/src/emsdk/emsdk_env.sh
 
 # Execute script
 bash /docker/scripts/godot-compiler.sh ${GODOT_SRC_CODE}
-
-# Copy result to output dir
-cp /godot/bin/godot.x11.tools.64 /output

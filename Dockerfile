@@ -1,5 +1,4 @@
 FROM ubuntu:20.04
-MAINTAINER Louis FRADIN <louis.fradin@gmail.com>
 
 # Install dependencies
 ###############################################################################
@@ -44,6 +43,7 @@ VOLUME /godot
 
 # Prepare branch number
 ENV GODOT_BRANCH 3.2
+ENV PLATFORM x11
 
 # Volume for output results
 VOLUME /output

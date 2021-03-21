@@ -1,9 +1,14 @@
 #!/bin/bash
 
 # Variables
-THREADS=$(nproc)
-if [ -z "$TEMPLATE_BASE_DIR" ]; then TEMPLATE_BASE_DIR="${HOME}/.local/share/godot/templates"; fi
-if [ -z "$GODOT_EDITOR" ]; then GODOT_EDITOR=godot.x11.tools.64; fi
+################################################################################
+
+# Variables
+if [ -z "${THREADS}" ]; then THREADS=$(nproc); fi
+if [ -z "${BINARY_BASE_DIR}" ]; then BINARY_BASE_DIR="${HOME}/.local/bin"; fi
+if [ -z "${TEMPLATE_BASE_DIR}" ]; then TEMPLATE_BASE_DIR="${HOME}/.local/share/godot/templates"; fi
+if [ -z "${PLATFORM}" ]; then PLATFORM=x11; fi
+if [ -z "${GODOT_EDITOR}" ]; then GODOT_EDITOR=godot.${PLATFORM}.tools.64; fi
 
 # Get godot path and go
 GODOT_PATH=$1
@@ -13,12 +18,21 @@ if [ "${GODOT_PATH}" == "" ]; then
 fi 
 cd "${GODOT_PATH}"
 
+# Godot Source Code
+################################################################################
+
 echo "# Update project"
 git pull
 
+# Linux Editor
+################################################################################
+
 echo "# Compile Editor for Linux"
-scons -j${THREADS} platform=x11
-cp ${GODOT_PATH}/bin/godot.x11.tools.64 ${OUTPUT_DIR}/
+scons -j${THREADS} platform=${PLATFORM}
+cp -f ${GODOT_PATH}/bin/${GODOT_EDITOR} ${BINARY_BASE_DIR}/
+
+# Get informations on Editor
+################################################################################
 
 echo "# Get informations from compiled editor"
 COMPLETE_VERSION=$(${GODOT_PATH}/bin/${GODOT_EDITOR} --version)
@@ -31,11 +45,20 @@ TEMPLATE_DIR="${TEMPLATE_BASE_DIR}/${VERSION}"
 mkdir -p ${TEMPLATE_DIR}
 echo "Template directory is '${TEMPLATE_DIR}'"
 
-echo "# Compile and install export templates for Linux 64bits"
-scons -j${THREADS} platform=x11 tools=no target=release bits=64
-cp ${GODOT_PATH}/bin/godot.x11.opt.64 ${TEMPLATE_DIR}/linux_x11_64_release
-scons -j${THREADS} platform=x11 tools=no target=release_debug bits=64
-cp ${GODOT_PATH}/bin/godot.x11.opt.debug.64 ${TEMPLATE_DIR}/linux_x11_64_debug
+# Templates for Linux
+################################################################################
+
+LINUX_BITS=( 32 64 )
+for BITS in "${LINUX_BITS[@]}"; do
+	echo "# Compile and install export templates for Linux ${BITS}bits"
+	scons -j${THREADS} platform=${PLATFORM} tools=no target=release bits=${BITS}
+	cp ${GODOT_PATH}/bin/godot.${PLATFORM}.opt.${BITS} ${TEMPLATE_DIR}/linux_${PLATFORM}_${BITS}_release
+	scons -j${THREADS} platform=${PLATFORM} tools=no target=release_debug bits=${BITS}
+	cp ${GODOT_PATH}/bin/godot.${PLATFORM}.opt.debug.${BITS} ${TEMPLATE_DIR}/linux_${PLATFORM}_${BITS}_debug
+done
+
+# Templates for Android
+################################################################################
 
 echo "# Compile and install export templates for Android"
 # Release mode
@@ -56,8 +79,14 @@ cd ../../..
 cp ${GODOT_PATH}/bin/android_release.apk ${TEMPLATE_DIR}/
 cp ${GODOT_PATH}/bin/android_debug.apk ${TEMPLATE_DIR}/
 
+# Templates for Windows
+################################################################################
+
 echo "# Compile and install export templates for Windows"
 echo "TODO"
+
+# Templates for Web
+################################################################################
 
 echo "# Compile and install export templates for Web"
 scons -j${THREADS} platform=javascript tools=no target=release javascript_eval=no
